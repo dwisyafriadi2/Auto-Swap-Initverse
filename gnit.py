@@ -269,7 +269,7 @@ def run_swap_loop(account, proxy=None, swap_amount_eth=0.2):
             logger.error(f"Error in swap loop for {account.address}: {e}")
 def get_swap_amount():
     try:
-        amount = float(input("Enter the amount of ETH to swap to USDT (in ETH): ").strip())
+        amount = float(input("Enter the amount of INI to swap to USDT: ").strip())
         return amount
     except ValueError:
         logger.error("Invalid input. Please enter a numeric value.")
