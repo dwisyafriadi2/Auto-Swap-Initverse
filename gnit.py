@@ -31,16 +31,15 @@ TOKENS = {
 
 def print_banner():
     banner = """
-                _  _
-             .-. || |               .-.
-            |   || |_              | | |   
- .--.  .---.| |_||( )  .--.  .---. | |_|_ .--.
-( (`\\]/ .-. ||  _| |/ ( (`\\]/ .-. \\|  _  [ `\\]
- `'.'.| | | || |   (   `'.'.| | | || | | || |_
-[\\__) ) '-' || |_   \\   [\\__) ) '-' || | | || |_
- '--'  '---'|___|    '--'  '---'|___||___[___]
-             DASAR PEMULUNG - GETTING RICH TOGETHER!
-
+\033[95m                _  _
+\033[92m             .-. || |               .-.
+\033[91m            |   || |_              | | |   
+\033[93m .--.  .---.| |_||( )  .--.  .---. | |_|_ .--.
+\033[94m( (\\]/ .-. ||  _| |/ ( (\\]/ .-. \\|  _  [ \\]
+\033[96m '.'.| | | || |   (   '.'.| | | || | | || |_
+\033[92m[\\__) ) '-' || |_   \\   [\\__) ) '-' || | | || |_
+\033[91m '--'  '---'|___|    '--'  '---'|___||___[___]
+\033[93m    DASAR PEMULUNG - GETTING RICH TOGETHER!\033[0m
     """
     print(banner)
 
@@ -224,7 +223,7 @@ def perform_swap(w3, account, router_contract, path, amount_in, is_eth_to_token)
         logger.error(f"Error during swap: {e}")
         return False
 
-def run_swap_loop(account, proxy=None):
+def run_swap_loop(account, proxy=None, swap_amount_eth=0.2):
     w3 = get_web3_provider(proxy)
     router_address = "0x4ccB784744969D9B63C15cF07E622DDA65A88Ee7"
     router_contract = w3.eth.contract(
@@ -250,7 +249,7 @@ def run_swap_loop(account, proxy=None):
                 account,
                 router_contract,
                 paths["eth_to_usdt"],
-                w3.to_wei("0.2", "ether"),
+                w3.to_wei(swap_amount_eth, "ether"),
                 True,
             ):
                 logger.info(f"INI to USDT swap successful for {account.address}")
@@ -268,11 +267,21 @@ def run_swap_loop(account, proxy=None):
 
         except Exception as e:
             logger.error(f"Error in swap loop for {account.address}: {e}")
+def get_swap_amount():
+    try:
+        amount = float(input("Enter the amount of ETH to swap to USDT (in ETH): ").strip())
+        return amount
+    except ValueError:
+        logger.error("Invalid input. Please enter a numeric value.")
+        sys.exit(1)
 
 def main():
     try:
         os.system("clear") if os.name == "posix" else os.system("cls")
         print_banner()
+
+        # Get swap amount from user
+        swap_amount_eth = get_swap_amount()
 
         threads = []
         for i, private_key in enumerate(PRIVATE_KEYS):
@@ -283,7 +292,7 @@ def main():
                 logger.error(f"Verification failed for {account.address}")
                 continue
 
-            thread = threading.Thread(target=run_swap_loop, args=(account, proxy))
+            thread = threading.Thread(target=run_swap_loop, args=(account, proxy, swap_amount_eth))
             threads.append(thread)
             thread.start()
 
@@ -293,6 +302,5 @@ def main():
     except KeyboardInterrupt:
         logger.info("Operation interrupted by user.")
         sys.exit()
-
 if __name__ == "__main__":
     main()
